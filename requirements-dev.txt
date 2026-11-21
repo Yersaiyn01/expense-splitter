@@ -1,0 +1,5 @@
+# Pinned dev/test toolchain (versions verified in this environment on 2026-11-21).
+# Change only with human review - see AGENTS.md.
+pytest==9.1.1
+ruff==0.16.9
+mypy==2.3.1

@@ -1,0 +1,33 @@
+$ PYTHONPATH=. python scripts/risk_probe.py
+--- R1 equal split 100/3, sum of shares
+result: ({'Ali': 33.33, 'Dana': 33.33, 'Timur': 33.33}, 99.99)
+--- R1 balances sum (should be 0)
+result: 0.01
+--- R2 percent 60+60
+result: {'Ali': 30.0, 'Dana': 30.0}
+--- R2b negative amount
+result: {'Ali': -20.0, 'Dana': -20.0}
+--- R3 unknown mode 'equl' -> split
+result: {}
+--- R3 balances with typo mode
+result: {'Ali': 30.0}
+--- R4 empty participants
+EXCEPTION: ZeroDivisionError float division by zero
+--- R5 load truncated JSON
+EXCEPTION: JSONDecodeError Expecting ',' delimiter: line 1 column 39 (char 38)
+--- R6 shares mode missing weight
+EXCEPTION: KeyError 'Dana'
+$ grep -rnE "eval\(|exec\(|pickle|subprocess|os\.system" expense_splitter
+(no matches)
+
+$ cat requirements.txt
+pytest
+
+$ ls .github
+ls: cannot access '.github': No such file or directory
+
+$ PYTHONPATH=. python scripts/save_probe.py
+before: 1 expense(s) on disk
+save failed: Object of type object is not JSON serializable
+file size after failed save: 361 bytes
+after: load fails -> JSONDecodeError Expecting value: line 23 column 14 (char 361)

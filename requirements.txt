@@ -1,1 +1,1 @@
-pytest
+# Runtime: standard library only (Python >= 3.10). Dev tools: requirements-dev.txt
