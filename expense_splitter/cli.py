@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from . import storage
-from .calculator import balances, describe_mode, total_by_category
+from .calculator import balances, describe_mode, total_by_category, validate
 from .models import Expense
 
 
@@ -34,6 +34,14 @@ def main(argv=None):
     sub.add_parser("report")
 
     args = parser.parse_args(argv)
+    try:
+        return run(args, parser)
+    except ValueError as ex:  # invalid user input or invalid stored expense
+        print(f"error: {ex}", file=sys.stderr)
+        return 2
+
+
+def run(args, parser):
     expenses = storage.load(args.file)
 
     if args.command == "add":
@@ -46,6 +54,7 @@ def main(argv=None):
             weights=parse_weights(args.weights),
             category=args.category,
         )
+        validate(e)  # reject before anything is written to disk
         expenses.append(e)
         storage.save(expenses, args.file)
         print(f"Added: {e.description} ({e.amount:.2f})")

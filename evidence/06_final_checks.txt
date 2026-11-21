@@ -1,0 +1,77 @@
+$ sh scripts/check.sh   # FINAL
+== pytest
+.....................                                                    [100%]
+21 passed in 0.02s
+== ruff
+All checks passed!
+== mypy
+Success: no issues found in 6 source files
+== build
+compile OK
+exit=0
+
+$ python -m pytest -v   # FINAL full list
+tests/test_acceptance.py::test_shares_split PASSED                       [  4%]
+tests/test_acceptance.py::test_describe_mode_labels PASSED               [  9%]
+tests/test_acceptance.py::test_cli_add_list_balance_report PASSED        [ 14%]
+tests/test_acceptance.py::test_v010_file_format_loads PASSED             [ 19%]
+tests/test_calculator.py::test_equal_split_two_people PASSED             [ 23%]
+tests/test_calculator.py::test_percent_split PASSED                      [ 28%]
+tests/test_calculator.py::test_balances_simple PASSED                    [ 33%]
+tests/test_calculator.py::test_total_by_category PASSED                  [ 38%]
+tests/test_mitigations.py::test_equal_shares_sum_to_amount[100.0-3] PASSED [ 42%]
+tests/test_mitigations.py::test_equal_shares_sum_to_amount[10.0-3] PASSED [ 47%]
+tests/test_mitigations.py::test_equal_shares_sum_to_amount[0.05-2] PASSED [ 52%]
+tests/test_mitigations.py::test_equal_shares_sum_to_amount[1234.57-7] PASSED [ 57%]
+tests/test_mitigations.py::test_shares_mode_sums_to_amount PASSED        [ 61%]
+tests/test_mitigations.py::test_balances_sum_to_zero PASSED              [ 66%]
+tests/test_mitigations.py::test_invalid_expense_rejected[expense0-unknown split mode] PASSED [ 71%]
+tests/test_mitigations.py::test_invalid_expense_rejected[expense1-must add up to 100] PASSED [ 76%]
+tests/test_mitigations.py::test_invalid_expense_rejected[expense2-missing weight] PASSED [ 80%]
+tests/test_mitigations.py::test_invalid_expense_rejected[expense3-at least one participant] PASSED [ 85%]
+tests/test_mitigations.py::test_invalid_expense_rejected[expense4-amount must be positive] PASSED [ 90%]
+tests/test_mitigations.py::test_invalid_expense_rejected[expense5-positive] PASSED [ 95%]
+tests/test_mitigations.py::test_cli_rejects_typo_mode_and_does_not_save PASSED [100%]
+============================== 21 passed in 0.03s ==============================
+
+$ smoke run (temp file)
+Added: Dinner (100.00)
+exit=0
+error: unknown split mode 'equl'; use one of: equal, percent, shares
+exit=2
+error: percentages must add up to 100 (got 120.0)
+exit=2
+1. Dinner: 100.00 paid by Ali, split equally
+exit=0
+Ali: +66.66
+Dana: -33.33
+Timur: -33.33
+exit=0
+general: 100.00
+exit=0
+
+$ PYTHONPATH=. python scripts/risk_probe.py   # FINAL
+--- R1 equal split 100/3, sum of shares
+result: ({'Ali': 33.34, 'Dana': 33.33, 'Timur': 33.33}, 100.0)
+--- R1 balances sum (should be 0)
+result: 0.0
+--- R2 percent 60+60
+EXCEPTION: ValueError percentages must add up to 100 (got 120)
+--- R2b negative amount
+EXCEPTION: ValueError amount must be positive
+--- R3 unknown mode 'equl' -> split
+EXCEPTION: ValueError unknown split mode 'equl'; use one of: equal, percent, shares
+--- R3 balances with typo mode
+EXCEPTION: ValueError unknown split mode 'equl'; use one of: equal, percent, shares
+--- R4 empty participants
+EXCEPTION: ValueError an expense needs at least one participant
+--- R5 load truncated JSON
+EXCEPTION: JSONDecodeError Expecting ',' delimiter: line 1 column 39 (char 38)
+--- R6 shares mode missing weight
+EXCEPTION: ValueError missing weight for: Dana
+
+$ PYTHONPATH=. python scripts/save_probe.py   # FINAL (R7 not mitigated)
+before: 1 expense(s) on disk
+save failed: Object of type object is not JSON serializable
+file size after failed save: 361 bytes
+after: load fails -> JSONDecodeError Expecting value: line 23 column 14 (char 361)
