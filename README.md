@@ -17,3 +17,10 @@ calculate who owes whom.
 ## Tests
 
     sh scripts/check.sh     # tests + lint + types + compile
+
+## Known limitations (v0.1.0 + fixes)
+
+- **Back up `expenses.json` before use.** Saving is not yet atomic: if the program
+  crashes while writing, the file can be left broken (risk R7, open).
+- Files containing an invalid expense (e.g. a misspelled `--mode`) now make
+  `balance` stop with `error: ...`; fix the entry in the JSON file by hand.
